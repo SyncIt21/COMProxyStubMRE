@@ -3,14 +3,34 @@
 #include "TestInterfaces.h"
 #include <objidl.h>
 
-class MouseProxyBuffer : public IRpcProxyBuffer, public IMouse
+class MouseProxyBufferNonDelegate : public IRpcProxyBuffer
 {
 	ULONG refCount;
-	IRpcChannelBuffer* proxyBuffer;
-	IUnknown* proxyManager;
+	IUnknown* outerObject;
+
+	MouseProxyBufferNonDelegate(IUnknown*);
+
+private:
+	class MouseProxyBufferDelegate :  public IMouse
+	{
+		friend class MouseProxyBufferNonDelegate;
+		IRpcChannelBuffer* proxyBuffer;
+		IUnknown* outerObject;
+
+	public:
+		// Inherited via IUnknown
+		virtual HRESULT __stdcall QueryInterface(REFIID riid, void** ppvObject) override;
+		virtual ULONG __stdcall AddRef(void) override;
+		virtual ULONG __stdcall Release(void) override;
+
+		// Inherited via IMouse
+		virtual HRESULT click(int button) override;
+		virtual HRESULT scroll(int amount) override;
+	};
+	MouseProxyBufferDelegate innerObject;
 
 public:
-	MouseProxyBuffer(IUnknown*);
+	static HRESULT Create(IUnknown*, REFIID, void**);
 
 	// Inherited via IUnknown
 	virtual HRESULT __stdcall QueryInterface(REFIID riid, void** ppvObject) override;
@@ -20,32 +40,44 @@ public:
 	// Inherited via IRpcProxyBuffer
 	virtual HRESULT __stdcall Connect(IRpcChannelBuffer* pRpcChannelBuffer) override;
 	virtual void __stdcall Disconnect(void) override;
-
-	// Inherited via IMouse
-	virtual HRESULT click(int button) override;
-	virtual HRESULT scroll(int amount) override;
 };
 
-class KeyboardProxyBuffer : public IRpcProxyBuffer, public IKeyboard
+
+class KeyboardProxyBufferNonDelegate : public IRpcProxyBuffer
 {
 	ULONG refCount;
-	IRpcChannelBuffer* proxyBuffer;
-	IUnknown* proxyManager;
+	IUnknown* outerObject;
+
+	KeyboardProxyBufferNonDelegate(IUnknown*);
+
+	class KeyboardProxyBufferDelegate :  public IKeyboard
+	{
+		friend class KeyboardProxyBufferNonDelegate;
+		IRpcChannelBuffer* proxyBuffer;
+		IUnknown* outerObject;
+
+	public:
+		// Inherited via IUnknown
+		virtual HRESULT __stdcall QueryInterface(REFIID riid, void** ppvObject) override;
+		virtual ULONG __stdcall AddRef(void) override;
+		virtual ULONG __stdcall Release(void) override;
+
+		// Inherited via IKeyboard
+		virtual HRESULT pressKey(int key) override;
+		virtual HRESULT releaseKey(int key) override;
+	};
+	KeyboardProxyBufferDelegate innerObject;
 
 public:
-	KeyboardProxyBuffer(IUnknown*);
-
-	// Inherited via IUnknown
-	virtual HRESULT __stdcall QueryInterface(REFIID riid, void** ppvObject) override;
-	virtual ULONG __stdcall AddRef(void) override;
-	virtual ULONG __stdcall Release(void) override;
+	static HRESULT Create(IUnknown*, REFIID, void**);
 
 	// Inherited via IRpcProxyBuffer
 	virtual HRESULT __stdcall Connect(IRpcChannelBuffer* pRpcChannelBuffer) override;
 	virtual void __stdcall Disconnect(void) override;
 
-	// Inherited via IKeyboard
-	virtual HRESULT pressKey(int key) override;
-	virtual HRESULT releaseKey(int key) override;
+	// Inherited via IUnknown
+	virtual HRESULT __stdcall QueryInterface(REFIID riid, void** ppvObject) override;
+	virtual ULONG __stdcall AddRef(void) override;
+	virtual ULONG __stdcall Release(void) override;
 };
 

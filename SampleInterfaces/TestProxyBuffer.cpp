@@ -1,33 +1,54 @@
 #include "TestProxyBuffer.h"
 
-MouseProxyBuffer::MouseProxyBuffer(IUnknown* proxy):refCount(0),proxyBuffer(NULL),proxyManager(NULL)
+MouseProxyBufferNonDelegate::MouseProxyBufferNonDelegate(IUnknown* ptr_outer):refCount(0)
 {
-	proxyManager = proxy;
-	proxyManager->AddRef();
+	outerObject = ptr_outer;
+	innerObject.outerObject = ptr_outer;
 }
-HRESULT __stdcall MouseProxyBuffer::QueryInterface(REFIID riid, void** ppvObject)
+
+HRESULT MouseProxyBufferNonDelegate::Create(IUnknown* outer, REFIID riid, void** ppvObject)
 {
-	if (riid == IID_IRpcProxyBuffer)
+	if (outer != NULL && riid != IID_IUnknown)
+		return CLASS_E_NOAGGREGATION;
+	
+	MouseProxyBufferNonDelegate* mainObject = new MouseProxyBufferNonDelegate(outer);
+	if(mainObject == NULL)
+		return E_OUTOFMEMORY;
+
+	if (mainObject->outerObject == NULL)
 	{
-		*ppvObject = (IRpcProxyBuffer*)this;
-		((IUnknown*)*ppvObject)->AddRef();
-		return S_OK;
+		mainObject->outerObject = mainObject;
+		mainObject->innerObject.outerObject = mainObject;
 	}
+
+	HRESULT hr = mainObject->QueryInterface(riid, (void**)ppvObject);
+	if (FAILED(hr))
+		delete mainObject;
+	return hr;
+}
+HRESULT __stdcall MouseProxyBufferNonDelegate::QueryInterface(REFIID riid, void** ppvObject)
+{
+	if (riid == IID_IUnknown)
+		*ppvObject = (IUnknown*)this;
 	else if (riid == IID_IMOUSE)
-	{
-		*ppvObject = (IMouse*)this;
-		((IUnknown*)*ppvObject)->AddRef();
-		return S_OK;
-	}
+		*ppvObject = (IMouse*)&innerObject;
+	else if (riid == IID_IRpcProxyBuffer)
+		*ppvObject = (IRpcProxyBuffer*)this;
 	else
-		return proxyManager->QueryInterface(riid, ppvObject);
+	{
+		*ppvObject = NULL;
+		return E_NOINTERFACE;
+	}
+
+	((IUnknown*)*ppvObject)->AddRef();
+	return S_OK;
 }
-ULONG __stdcall MouseProxyBuffer::AddRef(void)
+ULONG __stdcall MouseProxyBufferNonDelegate::AddRef(void)
 {
 	refCount++;
 	return refCount;
 }
-ULONG __stdcall MouseProxyBuffer::Release(void)
+ULONG __stdcall MouseProxyBufferNonDelegate::Release(void)
 {
 	refCount--;
 	if (refCount > 0)
@@ -36,25 +57,41 @@ ULONG __stdcall MouseProxyBuffer::Release(void)
 	delete this;
 	return 0;
 }
-HRESULT __stdcall MouseProxyBuffer::Connect(IRpcChannelBuffer* pRpcChannelBuffer)
+HRESULT __stdcall MouseProxyBufferNonDelegate::MouseProxyBufferDelegate::QueryInterface(REFIID riid, void** ppvObject) { return outerObject->QueryInterface(riid, ppvObject); }
+ULONG __stdcall MouseProxyBufferNonDelegate::MouseProxyBufferDelegate::AddRef(void) { return outerObject->AddRef(); }
+ULONG __stdcall MouseProxyBufferNonDelegate::MouseProxyBufferDelegate::Release(void) { return outerObject->Release(); }
+HRESULT __stdcall  MouseProxyBufferNonDelegate::Connect(IRpcChannelBuffer* pRpcChannelBuffer)
 {
-	proxyBuffer = pRpcChannelBuffer;
-	proxyBuffer->AddRef();
+	innerObject.proxyBuffer = pRpcChannelBuffer;
+	innerObject.proxyBuffer->AddRef();
 	return S_OK;
 }
-void __stdcall MouseProxyBuffer::Disconnect(void)
+void __stdcall  MouseProxyBufferNonDelegate::Disconnect(void)
 {
-	proxyBuffer->Release();
-	proxyBuffer = NULL;
+	innerObject.proxyBuffer->Release();
+	innerObject.proxyBuffer = NULL;
 }
-HRESULT MouseProxyBuffer::click(int button)
+HRESULT  MouseProxyBufferNonDelegate::MouseProxyBufferDelegate::click(int button)
 {
 	RPCOLEMESSAGE message = {};
 	ZeroMemory(&message, sizeof(RPCOLEMESSAGE));
 	message.cbBuffer = sizeof(int);
 
 	HRESULT hr = proxyBuffer->GetBuffer(&message, IID_IMOUSE);
-	if (FAILED(hr)) {
+	if (FAILED(hr)) 
+	{
+		std::string errorMsg;
+		switch (hr)
+		{
+		case E_INVALIDARG:errorMsg = "Invalid Arguments";
+			break;
+		case E_OUTOFMEMORY:errorMsg = "No Memory";
+			break;
+		case E_UNEXPECTED:errorMsg = "Catostrophic Failure";
+			break;
+		case E_FAIL:errorMsg = "Fail";
+		}
+		std::cout << errorMsg << std::endl;
 		return E_UNEXPECTED;
 	}
 
@@ -63,21 +100,47 @@ HRESULT MouseProxyBuffer::click(int button)
 
 	ULONG status = 0;
 	hr = proxyBuffer->SendReceive(&message, &status);
-	if (SUCCEEDED(hr)){
-		std::cout << std::string((char*)message.Buffer);
+	if (SUCCEEDED(hr)){std::cout << std::string((char*)message.Buffer);}
+	else
+	{
+		std::string errorMsg;
+		switch (hr)
+		{
+		case E_INVALIDARG:errorMsg = "Invalid Arguments";
+			break;
+		case E_OUTOFMEMORY:errorMsg = "No Memory";
+			break;
+		case E_UNEXPECTED:errorMsg = "Catostrophic Failure";
+			break;
+		case E_FAIL:errorMsg = "Fail";
+		}
+		std::cout << errorMsg << std::endl;
 	}
 	
 	proxyBuffer->FreeBuffer(&message);
 	return S_OK;
 }
-HRESULT MouseProxyBuffer::scroll(int amount)
+HRESULT  MouseProxyBufferNonDelegate::MouseProxyBufferDelegate::scroll(int amount)
 {
 	RPCOLEMESSAGE message = {};
 	ZeroMemory(&message, sizeof(RPCOLEMESSAGE));
 	message.cbBuffer = sizeof(int);
 
 	HRESULT hr = proxyBuffer->GetBuffer(&message, IID_IMOUSE);
-	if (FAILED(hr)) {
+	if (FAILED(hr)) 
+	{
+		std::string errorMsg;
+		switch (hr)
+		{
+		case E_INVALIDARG:errorMsg = "Invalid Arguments";
+			break;
+		case E_OUTOFMEMORY:errorMsg = "No Memory";
+			break;
+		case E_UNEXPECTED:errorMsg = "Catostrophic Failure";
+			break;
+		case E_FAIL:errorMsg = "Fail";
+		}
+		std::cout << errorMsg << std::endl;
 		return E_UNEXPECTED;
 	}
 
@@ -86,41 +149,59 @@ HRESULT MouseProxyBuffer::scroll(int amount)
 
 	ULONG status = 0;
 	hr = proxyBuffer->SendReceive(&message, &status);
-	if (SUCCEEDED(hr)) {
-		std::cout << std::string((char*)message.Buffer);
+	if (SUCCEEDED(hr)) {std::cout << std::string((char*)message.Buffer);}
+	else
+	{
+		std::string errorMsg;
+		switch (hr)
+		{
+		case E_INVALIDARG:errorMsg = "Invalid Arguments";
+			break;
+		case E_OUTOFMEMORY:errorMsg = "No Memory";
+			break;
+		case E_UNEXPECTED:errorMsg = "Catostrophic Failure";
+			break;
+		case E_FAIL:errorMsg = "Fail";
+		}
+		std::cout << errorMsg << std::endl;
 	}
 
 	proxyBuffer->FreeBuffer(&message);
 	return S_OK;
 }
 
-KeyboardProxyBuffer::KeyboardProxyBuffer(IUnknown* proxy):refCount(0),proxyBuffer(NULL),proxyManager(NULL)
+
+
+
+
+KeyboardProxyBufferNonDelegate::KeyboardProxyBufferNonDelegate(IUnknown* ptr_outer):refCount(0)
 {
-	proxyManager = proxy;
+	outerObject = ptr_outer;
+	innerObject.outerObject = outerObject;
 }
-HRESULT __stdcall KeyboardProxyBuffer::QueryInterface(REFIID riid, void** ppvObject)
+HRESULT __stdcall KeyboardProxyBufferNonDelegate::QueryInterface(REFIID riid, void** ppvObject)
 {
-	if (riid == IID_IRpcProxyBuffer)
-	{
-		*ppvObject = (IRpcProxyBuffer*)this;
-		((IUnknown*)*ppvObject)->AddRef();
-		return S_OK;
-	}
+	if (riid == IID_IUnknown)
+		*ppvObject = (IUnknown*)this;
 	else if (riid == IID_IKEYBOARD)
-	{
-		*ppvObject = (IKeyboard*)this;
-		((IUnknown*)*ppvObject)->AddRef();
-		return S_OK;
-	}
+		*ppvObject = (IKeyboard*)&innerObject;
+	else if (riid == IID_IRpcProxyBuffer)
+		*ppvObject = (IRpcProxyBuffer*)this;
 	else
-		return proxyManager->QueryInterface(riid, ppvObject);
+	{
+		*ppvObject = NULL;
+		return E_NOINTERFACE;
+	}
+
+	((IUnknown*)*ppvObject)->AddRef();
+	return S_OK;
 }
-ULONG __stdcall KeyboardProxyBuffer::AddRef(void)
+ULONG __stdcall KeyboardProxyBufferNonDelegate::AddRef(void)
 {
 	refCount++;
 	return refCount;
 }
-ULONG __stdcall KeyboardProxyBuffer::Release(void)
+ULONG __stdcall KeyboardProxyBufferNonDelegate::Release(void)
 {
 	refCount--;
 	if (refCount > 0)
@@ -129,25 +210,61 @@ ULONG __stdcall KeyboardProxyBuffer::Release(void)
 	delete this;
 	return 0;
 }
-HRESULT __stdcall KeyboardProxyBuffer::Connect(IRpcChannelBuffer* pRpcChannelBuffer)
+HRESULT KeyboardProxyBufferNonDelegate::Create(IUnknown* outer, REFIID riid, void** ppvObject)
 {
-	proxyBuffer = pRpcChannelBuffer;
-	proxyBuffer->AddRef();
+	if (outer != NULL && riid != IID_IUnknown)
+		return CLASS_E_NOAGGREGATION;
+
+	KeyboardProxyBufferNonDelegate* mainObject = new KeyboardProxyBufferNonDelegate(outer);
+	if (mainObject == NULL)
+		return E_OUTOFMEMORY;
+
+	if (mainObject->outerObject == NULL)
+	{
+		mainObject->outerObject = mainObject;
+		mainObject->innerObject.outerObject = mainObject;
+	}
+
+	HRESULT hr = mainObject->QueryInterface(riid, (void**)ppvObject);
+	if (FAILED(hr))
+		delete mainObject;
+	return hr;
+}
+HRESULT __stdcall KeyboardProxyBufferNonDelegate::KeyboardProxyBufferDelegate::QueryInterface(REFIID riid, void** ppvObject) { return outerObject->QueryInterface(riid, ppvObject); }
+ULONG __stdcall KeyboardProxyBufferNonDelegate::KeyboardProxyBufferDelegate::AddRef(void) { return outerObject->AddRef(); }
+ULONG __stdcall KeyboardProxyBufferNonDelegate::KeyboardProxyBufferDelegate::Release(void) { return outerObject->Release(); }
+HRESULT __stdcall KeyboardProxyBufferNonDelegate::Connect(IRpcChannelBuffer* pRpcChannelBuffer)
+{
+	innerObject.proxyBuffer = pRpcChannelBuffer;
+	innerObject.proxyBuffer->AddRef();
 	return S_OK;
 }
-void __stdcall KeyboardProxyBuffer::Disconnect(void)
+void __stdcall KeyboardProxyBufferNonDelegate::Disconnect(void)
 {
-	proxyBuffer->Release();
-	proxyBuffer = NULL;
+	innerObject.proxyBuffer->Release();
+	innerObject.proxyBuffer = NULL;
 }
-HRESULT KeyboardProxyBuffer::pressKey(int key)
+HRESULT KeyboardProxyBufferNonDelegate::KeyboardProxyBufferDelegate::pressKey(int key)
 {
 	RPCOLEMESSAGE message = {};
 	ZeroMemory(&message, sizeof(RPCOLEMESSAGE));
 	message.cbBuffer = sizeof(int);
 
 	HRESULT hr = proxyBuffer->GetBuffer(&message, IID_IKEYBOARD);
-	if (FAILED(hr)) {
+	if (FAILED(hr)) 
+	{
+		std::string errorMsg;
+		switch (hr)
+		{
+		case E_INVALIDARG:errorMsg = "Invalid Arguments";
+			break;
+		case E_OUTOFMEMORY:errorMsg = "No Memory";
+			break;
+		case E_UNEXPECTED:errorMsg = "Catostrophic Failure";
+			break;
+		case E_FAIL:errorMsg = "Fail";
+		}
+		std::cout << errorMsg << std::endl;
 		return E_UNEXPECTED;
 	}
 
@@ -156,21 +273,47 @@ HRESULT KeyboardProxyBuffer::pressKey(int key)
 
 	ULONG status = 0;
 	hr = proxyBuffer->SendReceive(&message, &status);
-	if (SUCCEEDED(hr)) {
-		std::cout << std::string((char*)message.Buffer);
+	if (SUCCEEDED(hr)) {std::cout << std::string((char*)message.Buffer);}
+	else
+	{
+		std::string errorMsg;
+		switch (hr)
+		{
+		case E_INVALIDARG:errorMsg = "Invalid Arguments";
+			break;
+		case E_OUTOFMEMORY:errorMsg = "No Memory";
+			break;
+		case E_UNEXPECTED:errorMsg = "Catostrophic Failure";
+			break;
+		case E_FAIL:errorMsg = "Fail";
+		}
+		std::cout << errorMsg << std::endl;
 	}
 
 	proxyBuffer->FreeBuffer(&message);
 	return S_OK;
 }
-HRESULT KeyboardProxyBuffer::releaseKey(int key)
+HRESULT KeyboardProxyBufferNonDelegate::KeyboardProxyBufferDelegate::releaseKey(int key)
 {
 	RPCOLEMESSAGE message = {};
 	ZeroMemory(&message, sizeof(RPCOLEMESSAGE));
 	message.cbBuffer = sizeof(int);
 
 	HRESULT hr = proxyBuffer->GetBuffer(&message, IID_IKEYBOARD);
-	if (FAILED(hr)) {
+	if (FAILED(hr)) 
+	{
+		std::string errorMsg;
+		switch (hr)
+		{
+		case E_INVALIDARG:errorMsg = "Invalid Arguments";
+			break;
+		case E_OUTOFMEMORY:errorMsg = "No Memory";
+			break;
+		case E_UNEXPECTED:errorMsg = "Catostrophic Failure";
+			break;
+		case E_FAIL:errorMsg = "Fail";
+		}
+		std::cout << errorMsg << std::endl;
 		return E_UNEXPECTED;
 	}
 
@@ -179,8 +322,21 @@ HRESULT KeyboardProxyBuffer::releaseKey(int key)
 
 	ULONG status = 0;
 	hr = proxyBuffer->SendReceive(&message, &status);
-	if (SUCCEEDED(hr)) {
-		std::cout << std::string((char*)message.Buffer);
+	if (SUCCEEDED(hr)) {std::cout << std::string((char*)message.Buffer);}
+	else
+	{
+		std::string errorMsg;
+		switch (hr)
+		{
+		case E_INVALIDARG:errorMsg = "Invalid Arguments";
+			break;
+		case E_OUTOFMEMORY:errorMsg = "No Memory";
+			break;
+		case E_UNEXPECTED:errorMsg = "Catostrophic Failure";
+			break;
+		case E_FAIL:errorMsg = "Fail";
+		}
+		std::cout << errorMsg << std::endl;
 	}
 
 	proxyBuffer->FreeBuffer(&message);

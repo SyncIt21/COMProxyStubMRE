@@ -40,20 +40,25 @@ HRESULT __stdcall ComputerIPSFactoryBuffer::CreateProxy(
 	void** ppv                 //We must give this a value. the actual interface specified by IID returned to the client
 )
 {
+	IUnknown* mainObject = NULL;
+
+	HRESULT hr;
 	if (riid == IID_IMOUSE)
-		*ppProxy = new MouseProxyBuffer(pUnkOuter);
+		hr = MouseProxyBufferNonDelegate::Create(pUnkOuter, IID_IUnknown, (void**)&mainObject);
 	else if (riid == IID_IKEYBOARD)
-		*ppProxy = new KeyboardProxyBuffer(pUnkOuter);
+		hr = KeyboardProxyBufferNonDelegate::Create(pUnkOuter, IID_IUnknown, (void**)&mainObject);
 	else
 	{
 		*ppv = NULL;
 		*ppProxy = NULL;
 		return E_NOINTERFACE;
 	}
+	if (FAILED(hr))
+		return E_UNEXPECTED;
 
-	((IUnknown*)*ppProxy)->QueryInterface(riid, (void**)ppv);
+	((IUnknown*)mainObject)->QueryInterface(riid, (void**)ppv);
 
-	return 	((IUnknown*)*ppProxy)->QueryInterface(IID_IRpcProxyBuffer, (void**)ppProxy);
+	return 	((IUnknown*)mainObject)->QueryInterface(IID_IRpcProxyBuffer, (void**)ppProxy);
 }
 
 //Server side
