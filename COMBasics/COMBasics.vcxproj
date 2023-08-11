@@ -109,6 +109,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -135,6 +137,9 @@
     <ClInclude Include="Containment.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\COMProxyStubMemory\COMProxyStubMemory.vcxproj">
+      <Project>{f0105288-ca59-4193-a23b-e86a6a2ec22b}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\SampleInterfaces\SampleInterfaces.vcxproj">
       <Project>{abf5ebc4-19ae-4ea7-8f5e-03783f07934d}</Project>
     </ProjectReference>

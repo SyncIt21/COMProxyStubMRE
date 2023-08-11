@@ -129,45 +129,6 @@ inline void in_memory_register_Test()
 
 inline void local_process_create_Test()
 {
-	//Register proxy/stub for marshalling IMouse & IKeyboard across processes
-	DWORD proxyNum;
-
-	HRESULT hr = CoRegisterClassObject(
-		CLSID_CMARSHAL,
-		new ComputerPSFactory(),
-		CLSCTX_INPROC_SERVER ,  //register factory for use out of process in same computer memory
-		REGCLS_MULTIPLEUSE,    //allow this factory to be used multiple times
-		&proxyNum
-	);
-	if (hr == S_OK) {
-		std::cout << "Proxy:Success" << std::endl;
-	}
-	else
-	{
-		if (hr == E_INVALIDARG) {
-			std::cout << "Proxy:Invalid Arg" << std::endl;
-		}
-		else if (hr == E_OUTOFMEMORY) {
-			std::cout << "Proxy:No Memory" << std::endl;
-		}
-		else if (hr == E_UNEXPECTED) {
-			std::cout << "Proxy:Unexpected" << std::endl;
-		}
-		return;
-	}
-
-	//Register this factory to allow creation of Proxy & stubs for IMouse interface
-	hr = CoRegisterPSClsid(IID_IMOUSE, CLSID_CMARSHAL);
-	if (FAILED(hr)) {
-		std::cout << "Mouse Proxy Not Registered" << std::endl;
-	}
-
-	//Register this factory to allow creation of Proxy & stubs for IKeyboard interface
-	hr = CoRegisterPSClsid(IID_IKEYBOARD, CLSID_CMARSHAL);
-	if (FAILED(hr)) { 
-		std::cout << "Keyboard Proxy Not Registered" << std::endl;
-	}
-
 	IMouse* mouse = nullptr;
 	hr = CoCreateInstance(
 		CLSID_CCOM,

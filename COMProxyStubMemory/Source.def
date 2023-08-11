@@ -1,0 +1,6 @@
+; COMProxyStubMemory.def : Declares the module parameters.
+
+LIBRARY
+
+EXPORTS
+	DllGetClassObject	PRIVATE

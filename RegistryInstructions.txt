@@ -1,0 +1,14 @@
+HKEY_CLASSES_ROOT
+  ->Interface
+    ->{IID_IMOUSE}
+       ->Default = {IMouse}
+       ->ProxyStubClsid32  = {CLSID_CMARSHAL}--------
+                                                    |
+                                                    |
+                                                    |
+HKEY_CLASSES_ROOT                                   |
+  ->CLSID                                           |
+    ->{CLSID_CMARSHAL}<-----------------------------|
+       ->Default = {ComputerIPSFactoryBuffer}
+        ->InprocServer32 = {<path to dll file of COMProxyStubMemory project after build>}
+       

@@ -7,6 +7,7 @@ class ComputerPSFactory : public IUnknown
 {
 	ULONG refCount;
 
+public:
 	// Inherited via IUnknown
 	virtual HRESULT __stdcall QueryInterface(REFIID riid, void** ppvObject) override;
 	virtual ULONG __stdcall AddRef(void) override;
