@@ -148,7 +148,7 @@ STDAPI DllRegisterServer(void)
 			return SELFREG_E_CLASS;
 		}
 
-		//Create HKEY_CLASSES_ROOT/Interface/{IID_IMOUSE}/ProxyStubClsid32
+		//Create HKEY_CLASSES_ROOT/Interface/{IID_IKEYBOARD}/ProxyStubClsid32
 		HKEY keyboardKey_proxystub32;
 		if (RegCreateKeyA(keyboardKey, "ProxyStubClsid32", &keyboardKey_proxystub32) != ERROR_SUCCESS)
 		{
@@ -157,7 +157,7 @@ STDAPI DllRegisterServer(void)
 			return SELFREG_E_CLASS;
 		}
 		/*
-		* HKEY_CLASSES_ROOT/Interface/{IID_IMOUSE}/ProxyStubClsid32
+		* HKEY_CLASSES_ROOT/Interface/{IID_IKEYBOARD}/ProxyStubClsid32
 		*  -> (Default) = {CLSID_CPROXYSTUB}
 		*/
 		data = std::string(proxy_stub_buffer, 100);
@@ -308,14 +308,14 @@ STDAPI DllUnregisterServer(void)
 		return SELFREG_E_CLASS;
 	}
 
-	//First Delete HKEY_CLASSES_ROOT/Interface/{IID_IMOUSE}/ProxyStubClsid32
+	//First Delete HKEY_CLASSES_ROOT/Interface/{IID_IKEYBOARD}/ProxyStubClsid32
 	if (RegDeleteKeyA(keyboard_key, "ProxyStubClsid32") != ERROR_SUCCESS)
 	{
 		RegCloseKey(interfaceKey);
 		return SELFREG_E_CLASS;
 	}
 
-	//Then Delete HKEY_CLASSES_ROOT/Interface/{IID_IMOUSE}
+	//Then Delete HKEY_CLASSES_ROOT/Interface/{IID_IKEYBOARD}
 	if (RegDeleteKeyA(interfaceKey, iid_buffer) != ERROR_SUCCESS)
 	{
 		RegCloseKey(interfaceKey);
