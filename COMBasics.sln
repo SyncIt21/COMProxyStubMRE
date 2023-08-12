@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SampleInterfaces", "SampleI
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "COMServer", "COMServer\COMLibServer.vcxproj", "{645C1624-6527-441C-8721-5ED0380B3508}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "COMProxyStubMemory", "COMProxyStubMemory\COMProxyStubMemory.vcxproj", "{F0105288-CA59-4193-A23B-E86A6A2EC22B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -41,6 +43,14 @@ Global
 		{645C1624-6527-441C-8721-5ED0380B3508}.Release|x64.Build.0 = Release|x64
 		{645C1624-6527-441C-8721-5ED0380B3508}.Release|x86.ActiveCfg = Release|Win32
 		{645C1624-6527-441C-8721-5ED0380B3508}.Release|x86.Build.0 = Release|Win32
+		{F0105288-CA59-4193-A23B-E86A6A2EC22B}.Debug|x64.ActiveCfg = Debug|x64
+		{F0105288-CA59-4193-A23B-E86A6A2EC22B}.Debug|x64.Build.0 = Debug|x64
+		{F0105288-CA59-4193-A23B-E86A6A2EC22B}.Debug|x86.ActiveCfg = Debug|Win32
+		{F0105288-CA59-4193-A23B-E86A6A2EC22B}.Debug|x86.Build.0 = Debug|Win32
+		{F0105288-CA59-4193-A23B-E86A6A2EC22B}.Release|x64.ActiveCfg = Release|x64
+		{F0105288-CA59-4193-A23B-E86A6A2EC22B}.Release|x64.Build.0 = Release|x64
+		{F0105288-CA59-4193-A23B-E86A6A2EC22B}.Release|x86.ActiveCfg = Release|Win32
+		{F0105288-CA59-4193-A23B-E86A6A2EC22B}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
