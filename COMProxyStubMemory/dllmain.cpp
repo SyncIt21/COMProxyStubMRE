@@ -171,7 +171,7 @@ STDAPI DllRegisterServer(void)
 
 		RegCloseKey(keyboardKey_proxystub32);
 		RegCloseKey(keyboardKey);
-	//==============================End Registering IID_IMOUSE=================================================
+	//==============================End Registering IID_IKEYBOARD=================================================
 
 	RegCloseKey(interfaceKey);
  //==============================End Registering IIDS=================================================
