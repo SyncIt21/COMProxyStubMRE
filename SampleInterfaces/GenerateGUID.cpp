@@ -5,17 +5,27 @@ void printAll()
 {
 	const GUID data[] = {
 		CLSID_CCOM,
-		CLSID_CMARSHAL,
+		CLSID_CPROXYSTUB,
 		IID_IMOUSE,
 		IID_IKEYBOARD,
 		IID_IPRINTBUFFER
 	};
 
+	const std::string names[] = {
+		"CLSID_CCOM",
+		"CLSID_CPROXYSTUB",
+		"IID_IMOUSE",
+		"IID_IKEYBOARD",
+		"IID_IPRINTBUFFER"
+	};
+	
 	for (int i = 0; i < 5; i++)
 	{
 		GUID guid = data[i];
+		std::string name = names[i];
 
-		printf("Guid = {%08lX-%04hX-%04hX-%02hX%02hX-%02hX%02hX%02hX%02hX%02hX%02hX}\n",
+		printf("%s = {%08lX-%04hX-%04hX-%02hX%02hX-%02hX%02hX%02hX%02hX%02hX%02hX}\n",
+			name.c_str(),
 			guid.Data1, guid.Data2, guid.Data3,
 			guid.Data4[0], guid.Data4[1], guid.Data4[2], guid.Data4[3],
 			guid.Data4[4], guid.Data4[5], guid.Data4[6], guid.Data4[7]);
@@ -26,7 +36,7 @@ void generateAll()
 {
 	const std::string data[] = {
 		"CLSID_CCOM",
-		"CLSID_CMARSHAL",
+		"CLSID_CPROXYSTUB",
 		"IID_IMOUSE",
 		"IID_IKEYBOARD",
 		"IID_IPRINTBUFFER"

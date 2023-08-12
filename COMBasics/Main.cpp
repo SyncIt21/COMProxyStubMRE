@@ -1,5 +1,6 @@
 #include <objbase.h>
 #include <iostream>
+#include <winreg.h>
 #include "GenerateGUID.h"
 #include "Containment.h"
 #include "TestPSInterface.h"
@@ -129,8 +130,55 @@ inline void in_memory_register_Test()
 
 inline void local_process_create_Test()
 {
+	/*
+	//Register proxy/stub for marshalling IMouse & IKeyboard across processes
+	DWORD proxyNum;
+
+	HRESULT hr = CoRegisterClassObject(
+		CLSID_CPROXYSTUB,
+		new ComputerPSFactory(),
+		CLSCTX_INPROC_SERVER,  //register factory for use out of process in same computer memory
+		REGCLS_MULTIPLEUSE,    //allow this factory to be used multiple times
+		&proxyNum
+	);
+	if (hr == S_OK) {
+		std::cout << "Proxy:Success" << std::endl;
+	}
+	else
+	{
+		if (hr == E_INVALIDARG) {
+			std::cout << "Proxy:Invalid Arg" << std::endl;
+		}
+		else if (hr == E_OUTOFMEMORY) {
+			std::cout << "Proxy:No Memory" << std::endl;
+		}
+		else if (hr == E_UNEXPECTED) {
+			std::cout << "Proxy:Unexpected" << std::endl;
+		}
+		return;
+	}
+
+	//Register this factory to allow creation of Proxy & stubs for IMouse interface
+	hr = CoRegisterPSClsid(IID_IMOUSE, CLSID_CPROXYSTUB);
+	if (FAILED(hr)) {
+		std::cout << "Mouse Proxy Not Registered" << std::endl;
+	}
+
+	//Register this factory to allow creation of Proxy & stubs for IKeyboard interface
+	hr = CoRegisterPSClsid(IID_IKEYBOARD, CLSID_CPROXYSTUB);
+	if (FAILED(hr)) {
+		std::cout << "Keyboard Proxy Not Registered" << std::endl;
+	}
+	*/
+
+	GUID psclsid;
+	if (FAILED(CoGetPSClsid(IID_IMOUSE, &psclsid)))
+	{
+		std::cout << "No Proxy for IID_IMOUSE found" << std::endl;
+		return;
+	}
 	IMouse* mouse = nullptr;
-	hr = CoCreateInstance(
+	HRESULT hr = CoCreateInstance(
 		CLSID_CCOM,
 		NULL,
 		CLSCTX_LOCAL_SERVER, //the object is registered in another process same computer
@@ -156,7 +204,12 @@ inline void local_process_create_Test()
 	else if (hr == E_POINTER) {
 		std::cout << "Pointer was null" << std::endl;
 	}
-
+	
+	if (FAILED(CoGetPSClsid(IID_IKEYBOARD, &psclsid)))
+	{
+		std::cout << "No Proxy for IID_IKEYBOARD found" << std::endl;
+		return;
+	}
 	IKeyboard* keyboard = nullptr;
 	hr = CoCreateInstance(
 		CLSID_CCOM,
@@ -185,6 +238,7 @@ inline void local_process_create_Test()
 		std::cout << "Pointer was null" << std::endl;
 	}
 
+	/*
 	hr = CoRevokeClassObject(proxyNum);
 	if (hr == S_OK) {
 		std::cout << "Proxy Unregister:Success" << std::endl;
@@ -201,6 +255,7 @@ inline void local_process_create_Test()
 			std::cout << "Proxy Unregister:Unexpected" << std::endl;
 		}
 	}
+	*/
 }
 
 int main()
