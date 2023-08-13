@@ -76,6 +76,7 @@ HRESULT  MouseProxyBufferNonDelegate::MouseProxyBufferDelegate::click(int button
 	RPCOLEMESSAGE message = {};
 	ZeroMemory(&message, sizeof(RPCOLEMESSAGE));
 	message.cbBuffer = sizeof(int);
+	message.iMethod = 3;
 
 	HRESULT hr = proxyBuffer->GetBuffer(&message, IID_IMOUSE);
 	if (FAILED(hr)) 
@@ -95,12 +96,11 @@ HRESULT  MouseProxyBufferNonDelegate::MouseProxyBufferDelegate::click(int button
 		return E_UNEXPECTED;
 	}
 
-	message.iMethod = 3;
 	((int*)message.Buffer)[0] = button;
 
 	ULONG status = 0;
 	hr = proxyBuffer->SendReceive(&message, &status);
-	if (SUCCEEDED(hr)){std::cout << std::string((char*)message.Buffer);}
+	if (SUCCEEDED(hr)){std::cout << std::string((char*)message.Buffer, message.cbBuffer) << std::endl;}
 	else
 	{
 		std::string errorMsg;
@@ -115,9 +115,10 @@ HRESULT  MouseProxyBufferNonDelegate::MouseProxyBufferDelegate::click(int button
 		case E_FAIL:errorMsg = "Fail";
 		}
 		std::cout << errorMsg << std::endl;
+
+		proxyBuffer->FreeBuffer(&message);
 	}
 	
-	proxyBuffer->FreeBuffer(&message);
 	return S_OK;
 }
 HRESULT  MouseProxyBufferNonDelegate::MouseProxyBufferDelegate::scroll(int amount)
@@ -125,6 +126,7 @@ HRESULT  MouseProxyBufferNonDelegate::MouseProxyBufferDelegate::scroll(int amoun
 	RPCOLEMESSAGE message = {};
 	ZeroMemory(&message, sizeof(RPCOLEMESSAGE));
 	message.cbBuffer = sizeof(int);
+	message.iMethod = 4;
 
 	HRESULT hr = proxyBuffer->GetBuffer(&message, IID_IMOUSE);
 	if (FAILED(hr)) 
@@ -144,12 +146,11 @@ HRESULT  MouseProxyBufferNonDelegate::MouseProxyBufferDelegate::scroll(int amoun
 		return E_UNEXPECTED;
 	}
 
-	message.iMethod = 4;
 	((int*)message.Buffer)[0] = amount;
 
 	ULONG status = 0;
 	hr = proxyBuffer->SendReceive(&message, &status);
-	if (SUCCEEDED(hr)) {std::cout << std::string((char*)message.Buffer);}
+	if (SUCCEEDED(hr)) { std::cout << std::string((char*)message.Buffer, message.cbBuffer) << std::endl; }
 	else
 	{
 		std::string errorMsg;
@@ -164,9 +165,9 @@ HRESULT  MouseProxyBufferNonDelegate::MouseProxyBufferDelegate::scroll(int amoun
 		case E_FAIL:errorMsg = "Fail";
 		}
 		std::cout << errorMsg << std::endl;
-	}
 
-	proxyBuffer->FreeBuffer(&message);
+		proxyBuffer->FreeBuffer(&message);
+	}
 	return S_OK;
 }
 
@@ -249,6 +250,7 @@ HRESULT KeyboardProxyBufferNonDelegate::KeyboardProxyBufferDelegate::pressKey(in
 	RPCOLEMESSAGE message = {};
 	ZeroMemory(&message, sizeof(RPCOLEMESSAGE));
 	message.cbBuffer = sizeof(int);
+	message.iMethod = 3;
 
 	HRESULT hr = proxyBuffer->GetBuffer(&message, IID_IKEYBOARD);
 	if (FAILED(hr)) 
@@ -268,12 +270,11 @@ HRESULT KeyboardProxyBufferNonDelegate::KeyboardProxyBufferDelegate::pressKey(in
 		return E_UNEXPECTED;
 	}
 
-	message.iMethod = 3;
 	((int*)message.Buffer)[0] = key;
 
 	ULONG status = 0;
 	hr = proxyBuffer->SendReceive(&message, &status);
-	if (SUCCEEDED(hr)) {std::cout << std::string((char*)message.Buffer);}
+	if (SUCCEEDED(hr)) { std::cout << std::string((char*)message.Buffer, message.cbBuffer) << std::endl; }
 	else
 	{
 		std::string errorMsg;
@@ -288,9 +289,10 @@ HRESULT KeyboardProxyBufferNonDelegate::KeyboardProxyBufferDelegate::pressKey(in
 		case E_FAIL:errorMsg = "Fail";
 		}
 		std::cout << errorMsg << std::endl;
+
+		proxyBuffer->FreeBuffer(&message);
 	}
 
-	proxyBuffer->FreeBuffer(&message);
 	return S_OK;
 }
 HRESULT KeyboardProxyBufferNonDelegate::KeyboardProxyBufferDelegate::releaseKey(int key)
@@ -298,6 +300,7 @@ HRESULT KeyboardProxyBufferNonDelegate::KeyboardProxyBufferDelegate::releaseKey(
 	RPCOLEMESSAGE message = {};
 	ZeroMemory(&message, sizeof(RPCOLEMESSAGE));
 	message.cbBuffer = sizeof(int);
+	message.iMethod = 4;
 
 	HRESULT hr = proxyBuffer->GetBuffer(&message, IID_IKEYBOARD);
 	if (FAILED(hr)) 
@@ -317,12 +320,11 @@ HRESULT KeyboardProxyBufferNonDelegate::KeyboardProxyBufferDelegate::releaseKey(
 		return E_UNEXPECTED;
 	}
 
-	message.iMethod = 4;
 	((int*)message.Buffer)[0] = key;
 
 	ULONG status = 0;
 	hr = proxyBuffer->SendReceive(&message, &status);
-	if (SUCCEEDED(hr)) {std::cout << std::string((char*)message.Buffer);}
+	if (SUCCEEDED(hr)){std::cout << std::string((char*)message.Buffer, message.cbBuffer) << std::endl;}
 	else
 	{
 		std::string errorMsg;
@@ -337,8 +339,9 @@ HRESULT KeyboardProxyBufferNonDelegate::KeyboardProxyBufferDelegate::releaseKey(
 		case E_FAIL:errorMsg = "Fail";
 		}
 		std::cout << errorMsg << std::endl;
+
+		proxyBuffer->FreeBuffer(&message);
 	}
 
-	proxyBuffer->FreeBuffer(&message);
 	return S_OK;
 }

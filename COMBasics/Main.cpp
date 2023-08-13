@@ -204,7 +204,7 @@ inline void local_process_create_Test()
 	else if (hr == E_POINTER) {
 		std::cout << "Pointer was null" << std::endl;
 	}
-	
+
 	if (FAILED(CoGetPSClsid(IID_IKEYBOARD, &psclsid)))
 	{
 		std::cout << "No Proxy for IID_IKEYBOARD found" << std::endl;

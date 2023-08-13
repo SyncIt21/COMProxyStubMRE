@@ -3,8 +3,8 @@
 CPrintBuffer::CPrintBuffer(std::string str):refCount(0),buffer(NULL),length(0)
 {
   length = (int)str.length();
-  buffer = new char[length];
-  strcpy_s(buffer, length, str.c_str());
+  buffer = new char[length + 1];
+  strcpy_s(buffer, length + 1, str.c_str());
 }
 
 HRESULT __stdcall CPrintBuffer::QueryInterface(REFIID riid, void** ppvObject)
@@ -137,7 +137,7 @@ HRESULT __stdcall Computer::MouseImp::QueryInterface(REFIID riid, void** ppvObje
   }
 
   ((IUnknown*)*ppvObject)->AddRef();
-  return E_NOTIMPL;
+  return S_OK;
 }
 ULONG __stdcall Computer::MouseImp::AddRef(void)
 {
@@ -200,7 +200,7 @@ HRESULT __stdcall Computer::KeyboardImp::QueryInterface(REFIID riid, void** ppvO
   }
 
   ((IUnknown*)*ppvObject)->AddRef();
-  return E_NOTIMPL;
+  return S_OK;
 }
 ULONG __stdcall Computer::KeyboardImp::AddRef(void)
 {

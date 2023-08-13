@@ -46,10 +46,6 @@ HRESULT __stdcall MouseStubBuffer::Invoke(RPCOLEMESSAGE* _prpcmsg, IRpcChannelBu
   char* buffer = NULL;
   int length = 0;
 
-
-  if (FAILED(mouse_implementation->QueryInterface(IID_IPRINTBUFFER, (void**)&printBuffer)))
-    return E_UNEXPECTED;
-
   switch (_prpcmsg->iMethod)
   {
   case 3:
@@ -67,13 +63,14 @@ HRESULT __stdcall MouseStubBuffer::Invoke(RPCOLEMESSAGE* _prpcmsg, IRpcChannelBu
     return E_NOTIMPL;
   }
 
+  if (FAILED(mouse_implementation->QueryInterface(IID_IPRINTBUFFER, (void**)&printBuffer)))
+    return E_UNEXPECTED;
   printBuffer->getString(&buffer);
   printBuffer->getLength(&length);
 
-  _prpcmsg->cbBuffer = sizeof(char) * length;
+  _prpcmsg->cbBuffer = length;
   _pRpcChannelBuffer->GetBuffer(_prpcmsg, IID_IMOUSE);
-  strcpy_s((char*)_prpcmsg->Buffer, length, buffer);
-  delete buffer;
+  std::memcpy(_prpcmsg->Buffer, buffer, _prpcmsg->cbBuffer);
 
   return NO_ERROR;
 }
@@ -137,9 +134,6 @@ HRESULT __stdcall KeyboardStubBuffer::Invoke(RPCOLEMESSAGE* _prpcmsg, IRpcChanne
   char* buffer = NULL;
   int length = 0;
 
-  if (FAILED(keyboard_implementation->QueryInterface(IID_IPRINTBUFFER, (void**)&printBuffer)))
-    return E_UNEXPECTED;
-
   switch (_prpcmsg->iMethod)
   {
   case 3:
@@ -157,13 +151,14 @@ HRESULT __stdcall KeyboardStubBuffer::Invoke(RPCOLEMESSAGE* _prpcmsg, IRpcChanne
     return E_NOTIMPL;
   }
 
+  if (FAILED(keyboard_implementation->QueryInterface(IID_IPRINTBUFFER, (void**)&printBuffer)))
+    return E_UNEXPECTED;
   printBuffer->getString(&buffer);
   printBuffer->getLength(&length);
 
-  _prpcmsg->cbBuffer = sizeof(char) * length;
+  _prpcmsg->cbBuffer = length;
   _pRpcChannelBuffer->GetBuffer(_prpcmsg, IID_IKEYBOARD);
-  strcpy_s((char*)_prpcmsg->Buffer, length, buffer);
-  delete buffer;
+  std::memcpy(_prpcmsg->Buffer, buffer, _prpcmsg->cbBuffer);
 
   return NO_ERROR;
 }
